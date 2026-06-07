@@ -19,15 +19,11 @@ st.set_page_config(
 # LOAD DATA
 # ==================================================
 
-sample_df = df.sample(
-    n=5000,
-    random_state=42
-)
+@st.cache_data
+def load_data():
+    return pd.read_csv("creditcard.csv")
 
-sample_df.to_csv(
-    "creditcard_sample.csv",
-    index=False
-)
+df = load_data()
 
 # ==================================================
 # LOAD MODEL
