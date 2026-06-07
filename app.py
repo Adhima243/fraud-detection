@@ -16,15 +16,13 @@ st.set_page_config(
 )
 
 # ==================================================
-# LOAD DATA
+# LOAD SAMPLE DATA (OPTIONAL)
 # ==================================================
 
-@st.cache_data
-def load_data():
-    return pd.read_csv("creditcard.csv")
-
-df = load_data()
-
+try:
+    df = pd.read_csv("creditcard_sample.csv")
+except:
+    df = None
 # ==================================================
 # LOAD MODEL
 # ==================================================
@@ -124,64 +122,29 @@ elif menu == "Visualisasi Dataset":
 
     st.title("📊 Visualisasi Dataset")
 
-    tab1, tab2, tab3 = st.tabs([
-        "Distribusi Fraud",
-        "Heatmap",
-        "Feature Selection"
-    ])
-
-    # --------------------------------
-
-    with tab1:
-
-        st.subheader("Distribusi Fraud")
-
-        fig, ax = plt.subplots(figsize=(6,4))
-
-        sns.countplot(
-            x="Class",
-            data=df,
-            ax=ax
-        )
-
-        ax.set_title("Distribusi Fraud")
-
-        st.pyplot(fig)
+    if df is None:
 
         st.warning("""
-        Dataset memiliki ketidakseimbangan kelas
-        sehingga digunakan teknik SMOTE dan
-        Random Undersampling.
+        Dataset tidak tersedia pada deployment.
+
+        Halaman ini hanya digunakan untuk
+        menampilkan hasil EDA dari proses training.
         """)
 
-    # --------------------------------
+        st.info("""
+        Pada penelitian ini dilakukan:
 
-    with tab2:
+        • Analisis distribusi fraud
 
-        st.subheader("Heatmap Korelasi")
+        • Analisis korelasi fitur
 
-        corr = df.corr()
+        • Seleksi 10 fitur terbaik
 
-        fig, ax = plt.subplots(
-            figsize=(12,8)
-        )
-
-        sns.heatmap(
-            corr,
-            cmap="coolwarm",
-            ax=ax
-        )
-
-        st.pyplot(fig)
-
-    # --------------------------------
-
-    with tab3:
-
-        st.subheader("10 Fitur Terpilih")
+        menggunakan dataset Credit Card Fraud Detection.
+        """)
 
         feature_df = pd.DataFrame({
-            "Fitur Terpilih": selected_features
+            "10 Fitur Terpilih": selected_features
         })
 
         st.dataframe(
@@ -189,11 +152,54 @@ elif menu == "Visualisasi Dataset":
             use_container_width=True
         )
 
-        st.success("""
-        Fitur dipilih berdasarkan
-        korelasi absolut tertinggi
-        terhadap label fraud.
-        """)
+    else:
+
+        tab1, tab2, tab3 = st.tabs([
+            "Distribusi Fraud",
+            "Heatmap",
+            "Feature Selection"
+        ])
+
+        with tab1:
+
+            st.subheader("Distribusi Fraud")
+
+            fig, ax = plt.subplots(figsize=(6,4))
+
+            sns.countplot(
+                x="Class",
+                data=df,
+                ax=ax
+            )
+
+            st.pyplot(fig)
+
+        with tab2:
+
+            st.subheader("Heatmap Korelasi")
+
+            fig, ax = plt.subplots(
+                figsize=(12,8)
+            )
+
+            sns.heatmap(
+                df.corr(),
+                cmap="coolwarm",
+                ax=ax
+            )
+
+            st.pyplot(fig)
+
+        with tab3:
+
+            feature_df = pd.DataFrame({
+                "10 Fitur Terpilih": selected_features
+            })
+
+            st.dataframe(
+                feature_df,
+                use_container_width=True
+            )
 
 # ==================================================
 # PREDIKSI
